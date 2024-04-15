@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bayesian Network Creator</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bayesian Network Creator</h1>
+    <div>
+        <label for="node-name">Node Name:</label>
+        <input type="text" id="node-name">
+        <label for="node-states">Node States (comma-separated):</label>
+        <input type="text" id="node-states">
+        <button onclick="addNode()">Add Node</button>
+    </div>
+    <div>
+        <h2>Nodes and Relationships</h2>
+        <ul id="nodes-list"></ul>
+    </div>
+    <div>
+        <button onclick="createNetwork()">Create Bayesian Network</button>
+        <button onclick="visualizeNetwork()">Visualize</button>
+    </div>
+    <div id="visualization">
+        <canvas id="graph-canvas" width="800" height="400"></canvas>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Select Parents for Node</h2>
+            <table id="parent-table">
+                <thead>
+                    <tr>
+                        <th>Node</th>
+                        <th>Parents</th>
+                        <th>Probabilities</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <button onclick="saveParents()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        const nodes = [];
+        const relationships = {};
+
+        function addNode() {
+            const nodeName = document.getElementById("node-name").value;
+            const nodeStates = document.getElementById("node-states").value.split(",").map(state => state.trim());
+
+            if (nodeName && nodeStates.length > 0) {
+                nodes.push({ name: nodeName, states: nodeStates });
+                document.getElementById("node-name").value = "";
+                document.getElementById("node-states").value = "";
+                updateNodesList();
+            }
+        }
+
+        function updateNodesList() {
+            const nodesList = document.getElementById("nodes-list");
+            nodesList.innerHTML = "";
+
+            for (const node of nodes) {
+                const li = document.createElement("li");
+                li.textContent = `${node.name}: ${node.states.join(", ")}`;
+                nodesList.appendChild(li);
+            }
+        }
+
+        function createNetwork() {
+            const parentTable = document.getElementById("parent-table").getElementsByTagName('tbody')[0];
+            parentTable.innerHTML = "";
+
+            for (const node of nodes) {
+                const row = document.createElement("tr");
+                const nodeNameCell = document.createElement("td");
+                nodeNameCell.textContent = node.name;
+                row.appendChild(nodeNameCell);
+
+                const parentCell = document.createElement("td");
+                const parentSelect = document.createElement("select");
+                parentSelect.multiple = true; // Added to allow multiple selection
+                for (const otherNode of nodes) {
+                    if (otherNode.name !== node.name) {
+                        const option = document.createElement("option");
+                        option.value = otherNode.name;
+                        option.textContent = otherNode.name;
+                        parentSelect.appendChild(option);
+                    }
+                }
+                parentCell.appendChild(parentSelect);
+                row.appendChild(parentCell);
+
+                const probabilityCell = document.createElement("td");
+                const probabilityInput = document.createElement("input");
+                probabilityInput.type = "text";
+                probabilityCell.appendChild(probabilityInput);
+                row.appendChild(probabilityCell);
+
+                parentTable.appendChild(row);
+            }
+
+            const modal = document.getElementById("modal");
+            modal.style.display = "block";
+        }
+
+        function saveParents() {
+            const parentTable = document.getElementById("parent-table").getElementsByTagName('tbody')[0];
+            for (const row of parentTable.rows) {
+                const nodeName = row.cells[0].textContent;
+                const parentSelect = row.cells[1].querySelector("select");
+                const selectedParents = Array.from(parentSelect.selectedOptions).map(option => option.value);
+                const probabilityInput = row.cells[2].querySelector("input");
+                const probabilities = probabilityInput.value.split(",").map(prob => parseFloat(prob.trim()));
+                relationships[nodeName] = { parents: selectedParents, probabilities };
+            }
+            closeModal();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById("modal");
+            modal.style.display = "none";
+        }
+
+        function visualizeNetwork() {
+            const canvas = document.getElementById("graph-canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 100;
+            const angleIncrement = (2 * Math.PI) / nodes.length;
+
+            ctx.font = "12px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                const angle = i * angleIncrement;
+
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillText(node.name, x, y - 15);
+
+                const parentNodes = relationships[node.name]?.parents || [];
+                const probabilities = relationships[node.name]?.probabilities || [];
+                for (let j = 0; j < parentNodes.length; j++) {
+                    const parentName = parentNodes[j];
+                    const parentIndex = nodes.findIndex(n => n.name === parentName);
+                    if (parentIndex !== -1) {
+                        const parentAngle = parentIndex * angleIncrement;
+                        const parentX = centerX + radius * Math.cos(parentAngle);
+                        const parentY = centerY + radius * Math.sin(parentAngle);
+
+                        // Draw the straight line from parent to child
+                        ctx.beginPath();
+                        ctx.moveTo(parentX, parentY);
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+
+                        // Calculate the angle of the line
+                        const lineAngle = Math.atan2(y - parentY, x - parentX);
+
+                        // Calculate the coordinates of the arrowhead
+                        const arrowX = x - 10 * Math.cos(lineAngle);
+                        const arrowY = y - 10 * Math.sin(lineAngle);
+
+                        // Draw the arrowhead
+                        ctx.beginPath();
+                        ctx.moveTo(arrowX, arrowY);
+                        ctx.lineTo(arrowX - 8 * Math.cos(lineAngle - Math.PI / 8), arrowY - 8 * Math.sin(lineAngle - Math.PI / 8));
+                        ctx.lineTo(arrowX - 8 * Math.cos(lineAngle + Math.PI / 8), arrowY - 8 * Math.sin(lineAngle + Math.PI / 8));
+                        ctx.closePath();
+                        ctx.fill();
+
+                        // Draw the probability text
+                        const probability = probabilities[j];
+                        ctx.fillText(`P(${node.name}|${parentName}) = ${probability}`, (x + parentX) / 2, (y + parentY) / 2);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

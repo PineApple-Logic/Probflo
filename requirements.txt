@@ -1,0 +1,7 @@
+Flask
+Flask_SocketIO
+gunicorn
+simple-websocket
+hypercorn
+openpyxl==3.1.2
+pandas

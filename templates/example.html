@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node States Input</title>
+</head>
+<body>
+<h1>Input Node States</h1>
+<form id="nodeForm">
+  <label for="nodeInput">Enter a Node:</label>
+  <input type="text" id="nodeInput" placeholder="Enter a node">
+  <label for="stateInput">Enter States (comma-separated):</label>
+  <input type="text" id="stateInput" placeholder="Enter states">
+  <button type="button" id="addNode">Add Node</button>
+</form>
+<ul id="nodeList">
+  <!-- Existing nodes will be added here -->
+</ul>
+<script>
+  const addNodeButton = document.getElementById("addNode");
+  const nodeInput = document.getElementById("nodeInput");
+  const stateInput = document.getElementById("stateInput");
+  const nodeList = document.getElementById("nodeList");
+
+  addNodeButton.addEventListener("click", function() {
+    const states = stateInput.value.split(",");
+    const stateSum = states.reduce((acc, state) => acc + parseFloat(state), 0);
+
+    if (stateSum !== 1) {
+      alert("Sum of states must be equal to 1.");
+      return;
+    }
+
+    const newNode = document.createElement("li");
+    newNode.textContent = nodeInput.value + " (" + states.join(", ") + ")";
+    nodeList.appendChild(newNode);
+
+    nodeInput.value = "";
+    stateInput.value = "";
+  });
+</script>
+</body>
+</html>

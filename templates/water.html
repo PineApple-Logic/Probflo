@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Water Quality Assessment</title>
+    <link rel="stylesheet" href="/static/stylesheets/node.css">
+    <script src="/static/javascripts/mappings.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    
+    <form id="assessment-form" enctype="multipart/form-data" >
+    <table>
+        <tr>
+            <th>Node Name</th>
+            <th>Question</th>
+            <th>Answer</th>
+        </tr>
+        <tr>
+            <td>WQ_ECOSYSTEM</td>
+            <td>Is the water quality acceptable for the ecosystem?</td>
+            <td>
+                <select>
+                    <option value="natural">Natural</option>  
+                    <option value="small_change">Small change</option>
+                    <option value="moderate_change">Moderate change</option>
+                    <option value="unacceptable">Unacceptable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WQ_PEOPLE</td>
+            <td>Is the water quality acceptable for the people?</td>
+            <td>
+                <select>
+                    <option value="natural">Natural</option>  
+                    <option value="small_change">Small change</option>
+                    <option value="moderate_change">Moderate change</option>
+                    <option value="unacceptable">Unacceptable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WQ_LIVESTOCK</td>
+            <td>Is the water quality acceptable for livestock?</td>
+            <td>
+                <select>
+                    <option value="natural">Natural</option>  
+                    <option value="small_change">Small change</option>
+                    <option value="moderate_change">Moderate change</option>
+                    <option value="unacceptable">Unacceptable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WQ_TREATMENT</td>
+            <td>What treatment does the water require?</td>
+            <td>
+                <select>
+                    <option value="natural">Natural</option>  
+                    <option value="small_change">Small change</option>
+                    <option value="moderate_change">Moderate change</option>
+                    <option value="unacceptable">Unacceptable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>FISH_ECO_POT</td>
+            <td>What is the potential for fish to occur under natural conditions?</td>
+            <td>
+                <select>
+                    <option value="no_fish">No fish</option>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>AQ_ALIENS_COMP</td>
+            <td>How much competition is there for fish from alien species?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="very_low">Very Low</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>AQ_ALIENS_PRED</td>
+            <td>How much predation of fish occurs from alien species?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="very_low">Very Low</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>NO_BARRIERS</td>
+            <td>How many barriers to fish occur?</td>
+            <td>
+                <select>
+                    <option value="none">None</option>
+                    <option value="few">Few</option>
+                    <option value="many">Many</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>INV_ECO_POT</td>
+            <td>What is the potential for invertebrates to occur under natural conditions?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>VEG_ECO_POT</td>
+            <td>What is the potential for riparian vegetation to occur under natural conditions?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>VEG_ECO_ACOMP</td>
+            <td>How much competition is there for riparian vegetation from alien species?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>LIV_VEG_POT</td>
+            <td>What is the potential for vegetation for livestock to occur at the site?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>LIV_VEG_PRED</td>
+            <td>Are there predators that pose a threat to livestock?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WAT_DIS_DPOT</td>
+            <td>What is the potential for water-borne disease to occur?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WAT_DIS_CPOT</td>
+            <td>What is the possibility of communities to occur that will be affected by water-borne disease?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WAT_DIS_HUM</td>
+            <td>Does human intervention occur to stop water-borne disease?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>WAT_DIS_PRED</td>
+            <td>Are there predators of water-disease vectors?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no" >No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>RES_RES_POT</td>
+            <td>What is the potential for resource resistance to occur?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>RES_RES_CFLO</td>
+            <td>Has the duration of flow changed?</td>
+            <td>
+                <select>
+                    <option value="increased">Increased</option>
+                    <option value="decreased">Decreased</option>
+                    <option value="no_change">No Change</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>FLO_ATT_POT </td>
+            <td>What is the potential for flood attenuation to occur?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>FLO_ATT_UPS</td>
+            <td>Are upstream mechanisms in place to control floods?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>RIV_ASS_POT</td>
+            <td>What is the potential for the river to assimilate pollution?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>TOURISM_POT</td>
+            <td>What is the tourism potential in the area?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>TOURISM_ACC</td>
+            <td>Is access available for tourism?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>REC_SPIR_POT</td>
+            <td>What is the potential for recreational and spiritual activities to occur?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>REC_SPIR_WILD</td>
+            <td>Is wildlife a threat to recreational and spiritual activities?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>LANDUSE_SSUP</td>
+            <td>Has land use contributed to sediment supply?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>DOM_WAT_DEM</td>
+            <td>What is the demand for domestic water?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>FISH_ECO_ALI</td>
+            <td>What is the demand for domestic water?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>INV_ECO_ALI</td>
+            <td>What is the demand for domestic water?</td>
+            <td>
+                <select>
+                    <option value="high">High</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="low">Low</option>
+                    <option value="not_sure">Not Sure</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>DOM_WAT_GRO</td>
+            <td>Does groundwater flow contribute to domestic water supply?</td>
+            <td>
+                <select>
+                    <option value="yes">Yes</option>       
+                    <option value="no">No</option>
+                    <option value="uncertain">Uncertain</option>
+                    <option value="not_applicable">Not Applicable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <label for="naturalFlows">Upload Natural Flows Excel File:</label>
+                <input type="file" id="naturalFlows" name="naturalFlows" accept=".xlsx">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="width: 100%;height: 100%;padding: 0;height: 50px;font-size: large;background-color: ;">
+                <button type="submit" style="width: 100%;height: 100%;">Download Case File</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="width: 100%;height: 100%;padding: 0;height: 50px;font-size: large;background-color: ;">
+                <a href="/netica" style="width: 100%;height: 100%;color: white;text-align: center;">Load Case File</a>
+            </td>
+        </tr>
+        
+    </table>
+    
+</form>
+    </body>
+    </html>
+    

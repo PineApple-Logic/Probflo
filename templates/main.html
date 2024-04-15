@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node Graphs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/stylesheets/styles.css"> <!-- You can create your own CSS file for styling -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/javascripts/leader-line.min.js"></script>
+
+  <script>
+    var nodeData = []
+    var init = false; 
+      
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+
+  <script>
+   var socket = io.connect('/');
+  
+  socket.on('connect', function() {
+      socket.emit('request_node_data');
+  });
+    
+  socket.on('node_data', function(data) {
+      nodeData = data.data;
+      console.log(nodeData);
+      // updateNodeCharts()    
+      
+  });
+
+  socket.emit('client_message', { message: 'Hello, server!' });  
+  
+  socket.on('server_message', function(data) {
+      console.log('Received from server:', data.message);
+     
+  });
+  </script>
+ 
+</head>
+<body>
+  <div style="left: 0;top: 0; position: absolute;color: white;justify-content: center;display: flex;align-items: top;height: 100%;width: 100%;z-index: 999;background-color: #1E1E1E;" id="modal">
+    <div>
+      <br>
+      <label for="nodeName">Node Name:</label>
+      <input type="text" id="nodeName" required>
+      <br><br><br>
+      <form id="dataForm">
+        
+        <label for="stateName">State Name:</label>
+        <input type="text" id="stateName" required>
+        <label for="stateValue">Probability Distribution:</label>
+        <input type="number" id="stateValue" step="0.01" required>
+        <button type="submit" id="addRowButton">Add Row</button>
+        <p class="error" id="errorMessage"></p>
+      
+      </form>
+      <style>table,tr,td,th{border: 1px white solid ; color: white;}
+      
+      table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background-color: #f2f2f2;
+    color: black;
+  }
+  th.header {
+    text-align: center;
+    background-color: #ddd;
+    font-weight: bold;
+    padding: 10px;
+    color: black;
+  }
+  form {
+    margin-bottom: 10px;
+  }
+      </style>
+      
+      <table style="width: 100%;">
+        <thead>
+          <tr>
+            <th class="header" colspan="3"></th>
+          </tr>
+          <tr>
+            <th>States</th>
+            <th>CPD</th>
+            <th class="actions-cell">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- No rows initially -->
+        </tbody>
+      </table>
+<br><br>
+      <button id="doneNodeBtn">Done</button>
+      <button onclick="hideModal()">Cancel</button>
+    </div>
+  </div>
+  <script> $("#modal").hide();</script>
+  <div class="dark-theme-container">
+    <!-- Your buttons and dropdowns here -->
+    <button class="btn"><i class="fas fa-undo"></i> Undo</button>
+    <button class="btn"><i class="fas fa-redo"></i> Redo</button>
+    <div class="dropdown">
+      <button class="btn dropdown-toggle"><i class="fas fa-sitemap"></i> Node</button>
+      <div class="dropdown-content" id="nodeListBtns">
+       
+        <a href="#" onclick="">Add Node</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="btn dropdown-toggle"><i class="fas fa-link"></i> Node Link</button>
+      <div class="dropdown-content">
+        <a href="#">Link a node</a>
+        
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="btn dropdown-toggle"><i class="fas fa-cog"></i> Properties</button>
+      <div class="dropdown-content">
+        <a href="#">Property 1</a>
+        <a href="#">Property 2</a>
+        <a href="#">Property 3</a>
+      </div>
+    </div>
+    <button class="btn" id="delNode"><i class="fas fa-trash"></i> Delete</button>
+   
+    <div class="dropdown">
+      <button class="btn dropdown-toggle"><i class="fas fa-code"></i> Expressions</button>
+      <div class="dropdown-content">
+        <a href="#">Expression 1</a>
+        <a href="#">Expression 2</a>
+        <a href="#">Expression 3</a>
+      </div>
+    </div>
+    <div class="dropdown">
+        <button class="btn dropdown-toggle"><i class="fas fa-chart-bar"></i> Node Chart</button>
+        <div class="dropdown-content">
+          <a href="#" onclick="showChart('pie')">Pie Chart</a>
+          <a href="#" onclick="showChart('bar')">Bar Chart</a>
+          <a href="#" onclick="showChart('line')">Line Chart</a>
+        </div>
+    </div>
+    <button class="btn" onclick="location.href='/water'"> <i class="fas fa-water" style="color: aqua;"></i> Water Discharge</button> 
+  </div>
+  <div class="node-graphs" id="nodeGraphsContainer">
+  </div>
+  <div id="arrowsContainer"></div>
+  <script src="/static/javascripts/contextmenu.js"></script>
+  <script src="/static/javascripts/arrows.js"></script>
+  <script src="/static/javascripts/delNode.js"></script>
+  <script src="/static/javascripts/draggable.js"></script>
+  <script src="/static/javascripts/scripts.js"></script>
+<script src="/static/javascripts/spawnnode.js"></script>
+
+<script> setTimeout(()=>{
+  
+  updateNodeCharts();
+  init =true ; 
+  },2000)</script>
+<!-- Add this script tag to include the SocketIO client library -->
+<script>
+  document.getElementById("delNode").addEventListener('click', ()=>{
+    document.getElementById("delNode").classList.toggle("delColor");  
+    let delBtns  = document.getElementsByClassName("delete-node-btn")
+
+    for (let btn of delBtns) {
+      console.log(btn.classList.toggle('visible'));
+    }
+  })
+</script>
+<script>
+
+</script>
+</body>
+</html>

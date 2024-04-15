@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Lato&family=PT+Sans+Narrow&display=swap');
+body,html {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    width: 100%;
+    height: 100%;
+    font-family: 'Cherry Bomb One', cursive;
+font-family: 'Lato', sans-serif;
+font-family: 'PT Sans Narrow', sans-serif;
+  }
+  
+  .dark-theme-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .btn {
+    background-color: #333;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+  }
+  
+  .dropdown-toggle {
+    background-color: #333;
+  }
+  
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    min-width: 150px;
+    z-index: 1;
+  }
+  
+  .dropdown-content a {
+    color: #ffffff;
+    padding: 10px;
+    display: block;
+    text-decoration: none;
+  }
+  
+  .dropdown-content.show {
+    display: block;
+  }
+  
+ /* Your existing CSS rules here */
+
+.node-graph {
+  border: 1px solid #ccc;
+  height: 200px;
+  /* margin: 10px; */
+  padding: 25px;
+  display: inline-block;
+  vertical-align: top;
+  position: absolute;
+  cursor: grab;
+}
+
+.node-chart-container {
+  width: 100%; /* Set width to fill the node */
+  height: calc(100% - 40px);
+  min-width: 250px;
+  
+  /* Subtract space for the header (h3) */
+}
+
+.node-chart {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+.node-graph.dragging {
+  cursor: grabbing;
+  border-color: orangered;
+}
+
+
+.circle {
+  width: 10px;
+  height: 10px;
+  background-color: orangered;
+  border-radius: 50%;
+  position: absolute;
+  cursor: pointer;
+  visibility: hidden;
+}
+
+.top {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.right {
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+}
+
+.bottom {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.left {
+  top: 50%;
+  left: -5px;
+  transform: translateY(-50%);
+}
+
+.visible {
+  visibility: visible;
+  visibility: hidden;
+}
+
+.arrow-with-line {
+  position: absolute;
+  height: 1px; /* Adjust the thickness of the line */
+  background-color: #fff; /* Change the color of the line */
+}
+
+.arrow-with-line::before {
+  content: '';
+  position: absolute;
+  bottom: -10px; /* Adjust the distance of the arrowhead from the line */
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  transform: rotate(270deg);
+  border-bottom: 20px solid #fff; /* Change the color as needed */
+}
+.delete-node-btn{
+  position: absolute;
+  right: 0;
+  top: 0;
+background-color: red;
+color:whitesmoke ; 
+border: 0.5px solid red;
+font-weight: bolder;
+
+}
+
+.delColor{
+  background-color: red;
+}
+
+
+
+.context-menu {
+  display: none;
+  position: absolute;
+  background-color: #1e1e1e;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 15px;
+  width: 230px;
+  z-index: 9999999999999999;
+  font-size: large;
+}
+
+.context-menu ul {
+  margin: 0;
+  padding: 0;
+ 
+  text-decoration: none;
+  list-style-type: none;
+  
+}
+
+.context-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  list-style-type: none;
+  display: flex;
+  justify-content: space-between;
+}
+
+.context-menu li:hover {
+  background-color: #f0f0f0;
+  color: black;
+}
+
+.shortcut {
+  text-align: right;
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <script>
+        var nodesData = {{ nodes |safe }};
+
+        // Function to create and display separate tables with charts for each node
+        function createTablesAndCharts() {
+            for (let node in nodesData) {
+                // Create HTML table
+                let html = "<table border='1' height=200 width=270>";
+                
+                // Create table header
+                html += "<tr><th>Category</th><th>Value</th></tr>";
+
+                // Populate table with data
+                for (let category in nodesData[node]) {
+                    html += "<tr><td>" + category + "</td><td>" + nodesData[node][category] + "</td></tr>";
+                }
+
+                // Close the table
+                html += "</table>";
+
+                // Create a container for the table and chart
+                let container = document.createElement('div');
+                container.style.display = 'flex';
+
+                // Append table to container
+                container.innerHTML += "<div style='flex:1;'>" + "<h2>" + node + " Table</h2>" + html + "</div>";
+
+                // Append chart canvas to container with title
+                container.innerHTML += "<div style='flex:1;'>" + 
+                                       "<h2  style='visibility:hidden'>" + node + " Chart</h2>" +
+                                       "<canvas id='" + node + "Chart' width='450' height='250'></canvas></div>";
+
+                // Append the container to the body
+                document.body.appendChild(container);
+
+                // Create a bar chart with title
+                var ctx = document.getElementById(node + "Chart").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(nodesData[node]),
+                        datasets: [{
+                            data: Object.values(nodesData[node]),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)',
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        title: {
+                            display: true,
+                            text: node + ' Chart'
+                        }
+                    }
+                });
+            }
+        }
+
+        // Call the function to create tables and charts
+        createTablesAndCharts();
+    </script>
+</body>
+</html>
