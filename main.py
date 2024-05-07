@@ -1,85 +1,72 @@
-from Modules.NeticaPy3.NeticaPy import Netica
+from Modules.NeticaPy3.netica import NeticaManager
+import os
+import json
+from Modules.NeticaPy3.NeticaPy import State
+
 
 # Path to the .neta file
 NETWORK_FILE = 'Modules/Netica_Modules/Balule.neta'
+JSON_FILE = 'conf/cas.json'
+os.environ["NETICA_PASSWORD"] = "+RoseB/Jataware/310-7/4753"
+CASE_FILE = 'Uploads/output.case'
 
 
-def print_end_node_beliefs(net):
-    # Get the beliefs of the end nodes
-    end_node_names = []
-    i = 0
-    while True:
-        try:
-            # Get the name of the node at index i
-            node_name = N.GetNodeName_bn(i).decode()
-            if node_name.endswith('_END'):
-                end_node_names.append(node_name)
-            i += 1
-        except:
-            # Break the loop when an exception occurs, indicating we have reached the end of the nodes
-            break
+def set_node_values(graph, data):
+    for node_name, node_data in data.items():
+        # Get the node by name
+        node = graph.get_node_by_name(node_name)
 
-    # Print the beliefs of the end nodes
-    for node_name in end_node_names:
-        # Get the node object by name
-        node = net.GetNode(node_name.encode(), False)  # Pass net object here
+        # Extract probabilities from node_data
+        state_probabilities = list(node_data.values())
 
-        # Get the belief for the first state
-        belief = N.GetNodeBelief_bn(node, 0)
-        print(f"Belief for {node_name}: {belief}")
+        # Assuming probabilities are represented as floats, we need to convert them to State objects
+        # Create instances of State directly if provided by the Netica API
+        state_probabilities_bn = [State(prob) for prob in state_probabilities]
+
+        # Set the probabilities for the states of the node
+        graph.set_node_probs(node, state_probabilities_bn)
 
 
-def print_all_node_names(net):
-    node_names = []
-    i = 0
-    while True:
-        try:
-            # Get the name of the node at index i
-            node_name = N.GetNodeName_bn(i).decode()
-            node_names.append(node_name)
-            i += 1
-        except:
-            # Break the loop when an exception occurs, indicating we have reached the end of the nodes
-            break
 
-    # Print all node names
-    for node_name in node_names:
-        print(node_name)
+
+def print_end_node_beliefs(graph):
+    print("End Node Beliefs:")
+    for node in graph.net_itr():
+        if not node.GetFirstChild_bn():
+            node_name = graph.get_node_name(node)
+            print(f"Node: {node_name}")
+            # Get the state names for the node from the JSON file
+            state_names = graph.node_state_names[node_name]
+            if state_names:
+                # Iterate over the state names from the JSON file
+                for state_name in state_names.keys():
+                    # Get the belief for the state
+                    belief = graph.get_node_belief(node, state_name)
+                    print(f"  {belief:.4f}")  # Print only the belief
+            print()
 
 
 if __name__ == '__main__':
-    # Initialize Netica environment
-    N = Netica()
-    env = N.NewNeticaEnviron_ns(b"", None, b"")
-    mesg = bytearray()
-    res = N.InitNetica2_bn(env, mesg)
+    # Initialize Netica manager
+    netica_manager = NeticaManager()
 
-    # Check if initialization was successful
-    if res != 0:
-        print(f"Initialization failed: {mesg.decode()}")
+    # Create a new network graph from the .neta file
+    try:
+        graph = netica_manager.new_graph(NETWORK_FILE)
+    except FileNotFoundError:
+        print(f"Failed to find network file: {NETWORK_FILE}")
         exit(1)
 
-    # Create a NeticaPy.Stream object
-    file_stream = N.NewFileStream_ns(NETWORK_FILE.encode(), None)
+    # Load data from JSON file
+    with open(JSON_FILE, 'r') as json_file:
+        data = json.load(json_file)
 
-    # Directly load Bayesian network structure from .neta file
-    net = N.ReadNet_bn(file_stream, True)
-
-    # Check if network file was loaded correctly
-    if net is None:
-        print("Failed to load network file.")
-        exit(1)
-    else:
-        print("Network file loaded successfully.")
-
-    # Print names of all nodes
-    print("All node names:")
-    print_all_node_names(net)
+    # Set node values based on the data from the JSON file
+    set_node_values(graph, data)
 
     # Print beliefs of end nodes
-    print("\nBeliefs of end nodes:")
-    print_end_node_beliefs(net)
+    print_end_node_beliefs(graph)
 
-    # Cleanup
-    N.DeleteNet_bn(net)
-    N.CloseNetica_bn(env, mesg)
+    # Cleanup environment
+    del netica_manager
+
