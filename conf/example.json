@@ -1,0 +1,380 @@
+{
+  "AQ_ALIENS_PRED": {
+    "Zero": 0.897845,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "AQ_ALIENS_COMP": {
+    "Zero": 14.8672,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_ALI": {
+    "Zero": 7.20616,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_ALI": {
+    "Zero": 43.4629,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_ALI": {
+    "Zero": 2.0314,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_POT": {
+    "Zero": 99.2664,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_DTW": {
+    "Zero": 75.7274,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "NO_BARRIERS": {
+    "Zero": 8.30569,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_BAR": {
+    "Zero": 4.55349,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "LANDUSE_SSUP": {
+    "Zero": 15.445,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_SSUP": {
+    "Zero": 6.85555,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "DISCHARGE_FD": {
+    "Zero": 380.4,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_SFLO": {
+    "Zero": 88.957,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_GEOM": {
+    "Zero": 86.3709,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "DISCHARGE_HF": {
+    "Zero": 11.1,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_VD": {
+    "Zero": 16.3896,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_COV": {
+    "Zero": 7.19822,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_HAB": {
+    "Zero": 64.0247,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "WQ_ECOSYSTEM": {
+    "Zero": 18.663,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_INS": {
+    "Zero": 42.1529,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "INV_ECO_ENV": {
+    "Zero": 30.0165,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_SSUP": {
+    "Zero": 21.6341,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_SFLO": {
+    "Zero": 16.8155,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_GEOM": {
+    "Zero": 15.8042,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_COV": {
+    "Zero": 7.75833,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_VD": {
+    "Zero": 23.8373,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_HAB": {
+    "Zero": 19.7505,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_CUEQ": {
+    "Zero": 7.91028,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SEASON_FRESH": {
+    "Zero": 8.79971,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_CUES": {
+    "Zero": 12.9854,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_INST": {
+    "Zero": 3.83692,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_BAR": {
+    "Zero": 2.92781,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_FISH_ENV": {
+    "Zero": 14.4081,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_BAR": {
+    "Zero": 14.302,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_SSUP": {
+    "Zero": 24.2176,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_SFLO": {
+    "Zero": 38.9956,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_GEOM": {
+    "Zero": 43.8879,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_VD": {
+    "Zero": 8.44765,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_COV": {
+    "Zero": 12.7417,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_HAB": {
+    "Zero": 42.7902,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_CUEQ": {
+    "Zero": 40.6095,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_CUES": {
+    "Zero": 1.9307,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_INS": {
+    "Zero": 26.3724,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "FISH_ECO_ENV": {
+    "Zero": 64.2678,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_ACOMP": {
+    "Zero": 21.0162,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SEASON_BASE": {
+    "Zero": 13.9234,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_VEG_DEPH": {
+    "Zero": 3.49789,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "DISCHARGE_LF": {
+    "Zero": 11.1,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_VEG_DEPL": {
+    "Zero": 3.2253,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_VEG_MIXH": {
+    "Zero": 8.08196,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "SUB_VEG_TURB": {
+    "Zero": 5.555,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_BAR": {
+    "Zero": 14.9952,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_CUES": {
+    "Zero": 25.472,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_ENV": {
+    "Zero": 26.0804,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_HAB": {
+    "Zero": 47.0915,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_INS": {
+    "Zero": 40.0677,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_SSUP": {
+    "Zero": 28.0304,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_SFLO": {
+    "Zero": 52.3652,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_GEOM": {
+    "Zero": 15.9226,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_VD": {
+    "Zero": 4.63185,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_COV": {
+    "Zero": 3.64133,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "VEG_ECO_POT": {
+    "Zero": 8.33172,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  },
+  "DISCHARGE_YR": {
+    "Zero": 11.1,
+    "Low": 0,
+    "Med": 0,
+    "High": 0
+  }
+}
