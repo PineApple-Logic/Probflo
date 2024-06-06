@@ -14,8 +14,15 @@ N = Netica()
 
 
 def set_node_values(graph, data):
+    print(data)
     for node_name, node_data in data.items():
         try:
+            print('----------------------------')
+            print(node_name)
+            print()
+            print(node_data)
+            print()
+
             # Get the node by name
             node = graph.get_node_by_name(node_name)
 
