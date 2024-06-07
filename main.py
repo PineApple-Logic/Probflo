@@ -1,7 +1,7 @@
 # In main.py
 
 from Modules.NeticaPy3.NeticaPy import Netica
-from Modules.NeticaPy3.netica import NeticaManager, logger
+from Modules.Netica_Modules.netica import NeticaManager, logger
 import os
 import json
 

@@ -1,4 +1,4 @@
-from Modules.NeticaPy3.netica import NeticaManager
+from Modules.Netica_Modules.netica import NeticaManager
 from Modules.NeticaPy3.NeticaPy import NewNode
 import os
 
