@@ -1,5 +1,10 @@
 # Python 3.9
+
+import sys
+import random
+import ctypes as ct
 from ctypes import c_int, c_double
+from ctypes import POINTER, c_double, cast
 from typing import List, Union, Generator, Optional
 from Modules.NeticaPy3.NeticaPy import Netica, NewNode as NeticaNode
 from Modules.NeticaPy3.NeticaPy import IntList, FloatList
@@ -8,9 +13,13 @@ import os
 from enum import Enum
 import logging
 
+
+
+BASE_DIR = os.getcwd()
 # Setting up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class Checking(Enum):
     NO_CHECK = 1
@@ -78,9 +87,14 @@ class NeticaManager:
             logger.warning(f"{password_varname} environment variable for password not set. Netica will not be able to load large networks.")
 
         # create the netica environment
+        INFINITY_ns = N.GetInfinityDbl_ns()
+
         self.env = N.NewNeticaEnviron_ns(password.encode('utf-8'), None, b"")
-        self.mesg = bytearray(1000)
+
+        self.mesg = bytearray()
+
         self.res = N.InitNetica2_bn(self.env, self.mesg)
+               
         logger.info("Netica initialization message:\n" + self.mesg.decode("utf-8"))
 
         self.finalizer = finalize(self, self.cleanup_env)
@@ -101,7 +115,11 @@ class NeticaManager:
         try:
             path = path.encode('utf-8')
             net = N.ReadNet_bn(N.NewFileStream_ns(path, self.env, b""), 0)
+            #print(net)
             N.CompileNet_bn(net)
+            #print(N.LengthNodeList_bn(N.GetNetNodes_bn(net)))
+
+            #print("Compiled Network")
             return NeticaGraph(net, self)
         except Exception as e:
             logger.error(f"Error loading or compiling network from {path}: {e}")
@@ -129,6 +147,8 @@ class NeticaGraph:
         for node_name, state_names in self.node_state_names.items():
             if len(state_names) == 1 and list(state_names.keys())[0] == "":
                 self.node_state_names[node_name] = None
+            #else:
+               # self.node_state_names[node_name] = state_names
 
         self.finalizer = finalize(self, self.cleanup_net)
 
@@ -254,46 +274,175 @@ class NeticaGraph:
         node = self.get_node(node)
         finding = N.GetNodeFinding_bn(node)
         return finding
+        # Generate three random float numbers between 0 and 1
 
-    def set_node_probs(self, node: Union[int, str, NeticaNode], parent_states: Optional[List[Union[int, str]]], probs: List[float]):
-        """Set the probabilities for a node given its parent states and corresponding probabilities."""
-        node = self.get_node(node)
+    def set_node_probs_randomly(self, node: Union[int, str, NeticaNode], parent_states: Optional[List[Union[int, str]]], probs: List[float]):
+        """Set the probabilities of a node randomly."""        
+        states_array = list(range(len(parent_states)))
+        r1, r2, r3 = sorted([random.random() for _ in range(3)])
+        f1 = r1
+        f2 = r2 - r1
+        f3 = r3 - r2
+        f4 = 1 - r3
+        random_floats = [f1, f2, f3, f4]
 
-        # Check if the node has parent nodes
-        parent_nodes = N.GetNodeParents_bn(node)
-        num_parents = N.LengthNodeList_bn(parent_nodes)
+        if parent_states != None and len(states_array) < 5: # Check if the number of parent states is less than 5 i.e. ignore the last couple in json and set the probabilities
+          N.SetNodeProbs(node,*random_floats)
+          print(N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8"))
 
-        # Print parent nodes if available
-        if num_parents > 0:
-            logger.info(
-                f"Node '{self.get_node_name(node)}', Parent nodes: {parent_nodes}, Number of parents: {num_parents}")
+    def NodeStates(self,node,naming='statename'):
+        # returns the states of a node based on the naming convention
+        cnode = N.GetNodeNamed_bn(node, self.net) # Get the node object
+        y = N.GetNodeNumberStates_bn(cnode) # Get the number of states
+        states = []
+        for j in range(y):
+            if naming == 'statename': states.append(ct.cast(N.GetNodeStateName_bn(cnode,j),ct.c_char_p).value) # Get the state name
+            elif naming == 'titlename': states.append(ct.cast(N.GetNodeStateTitle_bn(cnode,j),ct.c_char_p).value) # Get the state title
+        return states
+    def ParentNodeStates(self, node, naming='statename'):
+        # returns the states of a parent node based on the naming convention
+        cnode = N.GetNodeNamed_bn(node, self.net)
+        y = N.GetNodeNumberStates_bn(cnode)
+        states = []
+        for j in range(y):
+            if naming == 'statename':
+                states.append(N.GetNodeStateName_bn(cnode, j))
+                #print(j," :",N.GetNodeStateName_bn(cnode, j))
+            elif naming == 'titlename':
+                states.append(ct.cast(N.GetNodeStateTitle_bn(cnode, j), ct.c_char_p).value)
+        return states
+    def get_node_probabilities(self, node_name, parent_node_name, parent_state_names):
+        """
+        Fetches the probabilities of a node given the names of parent states.
+        """
+
+        # Fetch node states
+        parent_node_states = self.NodeStates(parent_node_name)
+
+        # Convert state names to indices
+        parent_state_indices = []
+        for state_name in parent_state_names:
+            try:
+                state_index = parent_node_states.index(state_name)
+                parent_state_indices.append(state_index)
+            except ValueError:
+                raise ValueError(f"State name {state_name} not found in parent node states.")
+
+        # Call the API function
+        #print(parent_state_indices)
+        probabilities = N.GetNodeProbs_bn(node_name, parent_state_indices)
+
+
+        return probabilities
+    def normalize_probabilities(self, probs):
+        total = sum(probs)
+        if total == 0:
+            raise ValueError("Sum of probabilities is zero, cannot normalize")
+        # Scale each probability proportionally to make the sum approximately 1
+        normalized_probs = [round(p / total, 3) for p in probs]
+        # Ensure the normalization is exact by adjusting the last element
+        diff = round(1 - sum(normalized_probs), 3)
+        normalized_probs[-1] += diff
+        # Format each probability to one decimal place
+        formatted_probs = [float(f"{p:.6f}") for p in normalized_probs]
+        return formatted_probs
+    def set_node_probabilities(self, node_name, parent_node_name, parent_state_names, probabilities):
+        """
+        Sets the probabilities of a node given the names of parent states.
+        """
+        error = ""
+        node_parents = N.GetNodeChildren_bn(node_name)
+        num_parents = N.LengthNodeList_bn(node_parents) 
+        parent_node_states = self.NodeStates(parent_node_name)
+
+        parent_state_indices = []
+        for state_name in parent_state_names:
+            try:
+                state_index = parent_node_states.index(state_name)
+                parent_state_indices.append(state_index)
+            except ValueError:
+                raise ValueError(f"State name {state_name} not found in parent node states.")
+        
+        parent_probs = []
+        for state in parent_node_states:
+            belief = N.GetNodeBelief(parent_node_name, state, self.net)
+            float_value = float(belief)
+            parent_probs.append(belief)
+
+        if parent_probs == None:
+            raise ValueError("Parent probabilities are None")
+        contains_zero = False
+        probabilities_list = []
+        key_names = []
+        for key, value in probabilities.items():
+            key_names.append(key)
+            try:
+                float_value = float(f"{round(value,3):.6f}")
+                if isinstance(float_value, float):
+                    if float_value < 0.00000001:
+                        probabilities_list.append(0.001)
+                        contains_zero = True
+                    else:
+                        probabilities_list.append(float_value)
+            except ValueError:
+                print(f"Warning: Value for '{key}' cannot be converted to float and will be skipped.")
+        sum_probabilities = sum(probabilities_list)
+        if sum_probabilities != 1:
+            orignal_probabilities = probabilities_list.copy()              
+            probabilities_list = self.normalize_probabilities(probabilities_list).copy()
+            print("-----------------Normalization-----------------")
+            if contains_zero:
+                print("Probabilities have been normalized and 0 values replaced with 0.001 for node with parent node:", parent_node_name)
+            else:
+                print("Probabilities have been normalized for node with parent node:", parent_node_name)
+            print("Original probabilities:", orignal_probabilities)
+            print("Updated probabilities:", probabilities_list)
+            print()
+        
+        if parent_state_names != None and len(parent_state_names) == len(probabilities_list):
+            N.SetNodeProbs(node_name,*probabilities_list)
+            error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
+            if(error != ""):
+                print("--------------Netica Error--------------")
+                print(error)
+                print()
         else:
-            logger.info(f"Node '{self.get_node_name(node)}' has no parent nodes")
+            parent_state_names = self.ParentNodeStates(parent_node_name)
+            print("-------------- Node node probabilities not updated --------------")
+            print("Node with issues:", parent_node_name)
+            print("State probabilities submitted",len(probabilities_list),"don't align with number of possible states specified in json.")
+            print("The parent states are:", parent_state_names)
+            print("The states in json are:", key_names)
+            print()
+    def NodeProbs(self,node,naming='statename'):
+        """        
+        returns the states of a node        
+        """
+        cnode = N.GetNodeNamed_bn(node, self.net)
+        y = N.GetNodeNumberStates_bn(cnode)
+        states = []
+        for j in range(y):
+            if naming == 'statename': states.append(ct.cast(N.GetNodeProbs_bn(cnode,j),ct.c_char_p).value)
+            elif naming == 'titlename': states.append(ct.cast(N.GetNodeProbs_bn(cnode,j),ct.c_char_p).value)
+        return states
+    def get_float_list_values(self, float_list_object, expected_length):
+        """
+        Accesses the internal float values of a FloatList object using ctypes.
 
-        # Check if parent_states is None or empty
-        if not parent_states:
-            if num_parents > 0:
-                raise ValueError("Parent states cannot be empty when the node has parent nodes.")
+        Args:
+            float_list_object: The FloatList object.
+            expected_length: The expected number of elements in the FloatList.
 
-            # Set probabilities without parent states
-            logger.info("Setting probabilities without parent states")
-            probs_c = FloatList(probs)
-            for i in range(1, 100):
-                print(i)
-            N.SetNodeProbs_bn(node, IntList([]), probs_c)
+        Returns:
+            A list of float values.
+        """
+        # Assuming the object has a pointer to an array of doubles
+        float_list_pointer = ct.cast(float_list_object, POINTER(c_double * expected_length))
+        print(float_list_pointer)
+        # Retrieve values from the array
+        float_array = [float_list_pointer.contents[i] for i in range(expected_length)]
 
-        else:
-            if len(parent_states) != num_parents:
-                raise ValueError("Number of parent states provided does not match the number of parents of the node.")
-
-            parent_indices = [self.get_node_state(self.get_node(N.NthNode_bn(parent_nodes, i)), state) for i, state in
-                              enumerate(parent_states)]
-            logger.info(f"Parent indices: {parent_indices}")
-
-            probs_c = FloatList(probs)
-            parent_indices_c = IntList(parent_indices)
-            N.SetNodeProbs_bn(node, parent_indices_c, probs_c)
-
+        return float_array
     def cleanup_net(self):
         """Run when the object is garbage collected"""
         N.DeleteNet_bn(self.net)

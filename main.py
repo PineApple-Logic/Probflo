@@ -1,9 +1,18 @@
 # In main.py
-
 from Modules.NeticaPy3.NeticaPy import Netica
 from Modules.Netica_Modules.netica import NeticaManager, logger
+from NeticaPy import Netica, NewNode as NeticaNode
+from NeticaPy import IntList, FloatList
+import ctypes as ct
+from ctypes import POINTER, c_double, cast
+from ctypes import c_int, c_double
+from typing import List, Union, Generator, Optional
+from weakref import finalize
+from enum import Enum
 import os
 import json
+import logging
+BASE_DIR = os.getcwd()
 
 # Path to the .neta file
 NETWORK_FILE = 'Modules/Netica_Modules/Balule.neta'
@@ -12,39 +21,34 @@ os.environ["NETICA_PASSWORD"] = "+RoseB/Jataware/310-7/4753"
 CASE_FILE = 'Uploads/output.case'
 N = Netica()
 
-
 def set_node_values(graph, data):
-    print(data)
     for node_name, node_data in data.items():
         try:
-            print('----------------------------')
-            print(node_name)
-            print()
-            print(node_data)
-            print()
 
-            # Get the node by name
-            node = graph.get_node_by_name(node_name)
+            if graph.get_node_by_name(node_name) is None:
+                logger.warning(f"Warning: Node '{node_name}' not found in the network.")
+                continue
+            else:
+                node = graph.get_node_by_name(node_name) # Get the node object from the graph                 
+                node_states = graph.ParentNodeStates(node_name.encode('utf-8')) # Get the state names for the nodes in the network
+            
+            # Set the probabilities for the node
+            #grap.set_node_probs_randomly(node, node_name.encode('utf-8'), node_states) 
+            
+            # Set the probabilities for the node from the JSON file
+            graph.set_node_probabilities(node, node_name.encode('utf-8'), node_states, node_data)
 
-            # Extract probabilities from node_data
-            state_probabilities = list(node_data.values())
-
-            # Get parent states if necessary
-            parents = N.GetNodeParents_bn(node)
-            num_parents = N.LengthNodeList_bn(parents)
-            parent_states = None if num_parents == 0 else [0] * num_parents  # Set to None if no parent nodes
-
-            # Set the probabilities for the states of the node
-            logger.info(f"Setting node '{node_name}' with parent states: {parent_states} and probabilities: {state_probabilities}")
-            graph.set_node_probs(node, parent_states, state_probabilities)
         except KeyError:
             logger.warning(f"Warning: Node '{node_name}' not found in the network.")
         except Exception as e:
             logger.error(f"Error setting values for node '{node_name}': {e}")
 
-
-
-
+def convert_strings_to_floats(input_array):
+    output_array = []
+    for element in input_array:
+        converted_float = float(element)
+        output_array.append(converted_float)
+    return output_array
 
 def print_end_node_beliefs(graph):
     print("End Node Beliefs:")
@@ -92,6 +96,8 @@ if __name__ == '__main__':
 
     # Set node values based on the data from the JSON file
     set_node_values(graph, data)
+    
+    #graph.outputNet()
 
     # Print beliefs of end nodes
     print_end_node_beliefs(graph)
