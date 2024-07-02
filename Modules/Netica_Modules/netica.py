@@ -361,7 +361,6 @@ class NeticaGraph:
         normalized_probs[-1] += diff
         # Format each probability to one decimal place
         formatted_probs = [float(f"{p:.6f}") for p in normalized_probs]
-        return formatted_probs
 
         return formatted_probs
 
@@ -373,8 +372,8 @@ class NeticaGraph:
         N.RetractNodeFindings_bn(node_name)
 
         print("----------------- Info about the node -----------------")
-        print("Node name:", parent_node_name)
-        print("Node kind:", N.GetNodeKind_bn(node_name))
+        logger.debug("Node name:", parent_node_name)
+        logger.debug("Node kind:", N.GetNodeKind_bn(node_name))
         node_kind = N.GetNodeKind_bn(node_name)
         node_desc = [
             {
@@ -403,15 +402,15 @@ class NeticaGraph:
                 "details": "See example code below."
             }
         ]
-        print(node_desc[node_kind-1])
+        logger.debug(node_desc[node_kind-1])
         node_children_names = [N.GetNodeName_bn(N.NthNode_bn(N.GetNodeChildren_bn(node_name), i)) for i in range(N.LengthNodeList_bn(N.GetNodeChildren_bn(node_name)))]
-        print("Node children:", node_children_names)
+        logger.debug("Node children:", node_children_names)
 
         parent_node_states = self.NodeStates(parent_node_name)
         stored_likelihood = N.GetNodeLikelihood_bn(node_name)
         print("----------------- Likelihoods -----------------")
         state_likelihood_array = [f"{state}: {likelihood}" for state, likelihood in zip(parent_node_states, stored_likelihood)]
-        print("State:Likelihood", state_likelihood_array)
+        logger.debug("State:Likelihood", state_likelihood_array)
 
         error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
         if error:
@@ -465,7 +464,7 @@ class NeticaGraph:
 
         if parent_state_names is not None and len(parent_state_names) == len(probabilities_list):
             if N.GetNodeType_bn(node_name) == 2:  # node type is discrete
-                print("Node findings are the following:", N.GetNodeFinding_bn(node_name))
+                logger.debug("Node findings are the following:", N.GetNodeFinding_bn(node_name))
                 number_state_names = [float(f"{round(float(key), 3):.6f}") for key in key_names if isinstance(float(f"{round(float(key), 3):.6f}"), float)]
                 state_names_length = len(parent_state_names)
                 parent_state_names_length = len(parent_state_names)
@@ -473,17 +472,22 @@ class NeticaGraph:
                 node_levels = N.GetNodeLevels_bn(node_name)
                 level_data = [node_levels[level] for level in range(parent_state_names_length)]
                 if level_data != node_levels:
+                    print()
                     print("----------------- Node levels Not The Same -----------------")
+                    print()
                     print("----------------- Original Node levels -----------------")
-                    print(level_data)
+                    logger.info(level_data)
                     N.SetNodeLevels_bn(node_name, parent_state_names_length, number_state_names)
                     level_data = [node_levels[level] for level in range(parent_state_names_length)]
+                    print()
                     print("----------------- Updating Node levels to -----------------")
-                    print(level_data)
+                    logger.info(level_data)
+                    print()
                 print("----------------- Using unedited Probabilities -----------------")
-                print("Probabilities list:", unedited_probabilities)
-                print("Size of unedited_probabilities list:", len(unedited_probabilities))
-                print("Size of node levels:", len(level_data))
+                logger.info("Probabilities list:", unedited_probabilities)
+                logger.info("Size of unedited_probabilities list:", len(unedited_probabilities))
+                logger.info("Size of node levels:", len(level_data))
+                print()
                 level_data_length = len(level_data)
                 array_of_integers = list(range(level_data_length))
                 try:
@@ -535,8 +539,6 @@ class NeticaGraph:
                 states.append(ct.cast(N.GetNodeProbs_bn(cnode, j), ct.c_char_p).value)
         return states
 
-   
-   
     def get_float_list_values(self, float_list_object, expected_length):
         """
         Accesses the internal float values of a FloatList object using ctypes.
@@ -555,6 +557,7 @@ class NeticaGraph:
         float_array = [float_list_pointer.contents[i] for i in range(expected_length)]
 
         return float_array
+
     def cleanup_net(self):
         """Run when the object is garbage collected"""
         N.DeleteNet_bn(self.net)
