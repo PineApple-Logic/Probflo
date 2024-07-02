@@ -17,6 +17,7 @@ logger.add(sys.stdout, format="<green>[{module}]</green><red>:</red><green>[{lin
                               "  <level>{level}<red>:</red> {message}</level>", level=level)
 
 
+
 class Checking(Enum):
     NO_CHECK = 1
     QUICK_CHECK = 2
@@ -102,7 +103,6 @@ class NeticaManager:
         self.mesg = bytearray()
 
         self.res = N.InitNetica2_bn(self.env, self.mesg)
-
         logger.info("Netica initialization message:\n" + self.mesg.decode("utf-8"))
 
         self.finalizer = finalize(self, self.cleanup_env)
@@ -361,6 +361,7 @@ class NeticaGraph:
         normalized_probs[-1] += diff
         # Format each probability to one decimal place
         formatted_probs = [float(f"{p:.6f}") for p in normalized_probs]
+        return formatted_probs
 
         return formatted_probs
 
@@ -369,66 +370,149 @@ class NeticaGraph:
         Sets the probabilities of a node given the names of parent states.
         """
         error = ""
-        node_parents = N.GetNodeChildren_bn(node_name)
-        num_parents = N.LengthNodeList_bn(node_parents)
+        N.RetractNodeFindings_bn(node_name)
+
+        print("----------------- Info about the node -----------------")
+        print("Node name:", parent_node_name)
+        print("Node kind:", N.GetNodeKind_bn(node_name))
+        node_kind = N.GetNodeKind_bn(node_name)
+        node_desc = [
+            {
+                "type": "NATURE_NODE",
+                "description": "Bayes nets are composed only of this type (and constant nodes).",
+                "details": "This is a 'chance' or 'deterministic' node of an influence diagram."
+            },
+            {
+                "type": "DECISION_NODE",
+                "description": "Indicates a variable that can be controlled.",
+                "details": "This is a 'decision' node of an influence diagram."
+            },
+            {
+                "type": "UTILITY_NODE",
+                "description": "A variable to maximize the expected value of.",
+                "details": "This is a 'value' node of an influence diagram."
+            },
+            {
+                "type": "CONSTANT_NODE",
+                "description": "A fixed parameter, useful as an equation constant.",
+                "details": "When its value changes, equations should be reconverted to CPT tables, and maybe the net recompiled."
+            },
+            {
+                "type": "DISCONNECTED_NODE",
+                "description": "The (virtual) parent node of a link which has been disconnected.",
+                "details": "See example code below."
+            }
+        ]
+        print(node_desc[node_kind-1])
+        node_children_names = [N.GetNodeName_bn(N.NthNode_bn(N.GetNodeChildren_bn(node_name), i)) for i in range(N.LengthNodeList_bn(N.GetNodeChildren_bn(node_name)))]
+        print("Node children:", node_children_names)
+
         parent_node_states = self.NodeStates(parent_node_name)
+        stored_likelihood = N.GetNodeLikelihood_bn(node_name)
+        print("----------------- Likelihoods -----------------")
+        state_likelihood_array = [f"{state}: {likelihood}" for state, likelihood in zip(parent_node_states, stored_likelihood)]
+        print("State:Likelihood", state_likelihood_array)
 
-        parent_state_indices = []
-        for state_name in parent_state_names:
-            try:
-                state_index = parent_node_states.index(state_name)
-                parent_state_indices.append(state_index)
-            except ValueError:
-                raise ValueError(f"State name {state_name} not found in parent node states.")
+        error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
+        if error:
+            print("--------- Error retrieving likelihoods ----------")
+            logger.error(f"{error} for {parent_node_name}")
+            print()
+            error = ""
 
-        parent_probs = []
-        for state in parent_node_states:
-            belief = N.GetNodeBelief(parent_node_name, state, self.net)
-            float_value = float(belief)
-            parent_probs.append(belief)
-
-        if parent_probs == None:
+        parent_state_indices = [parent_node_states.index(state_name) for state_name in parent_state_names]
+        parent_probs = [N.GetNodeBelief(parent_node_name, state, self.net) for state in parent_node_states]
+        if parent_probs is None:
             raise ValueError("Parent probabilities are None")
+
         contains_zero = False
         probabilities_list = []
+        unedited_probabilities = []
         key_names = []
+        parent_int = [int(i) for i in parent_state_indices]
         count = 0
+        original_values = []
         for key, value in probabilities.items():
             key_names.append(key)
             try:
                 float_value = float(f"{round(value, 3):.6f}")
                 if isinstance(float_value, float):
-                    if float_value < 0.00000001:
+                    if float_value < 0.00000001 or float_value <= 0.0:
                         probabilities_list.append(0.001)
+                        unedited_probabilities.append(0.0)
                         contains_zero = True
                         count += 1
                     else:
+                        unedited_probabilities.append(float_value)
                         probabilities_list.append(float_value)
             except ValueError:
                 logger.warning(f"Warning: Value for '{key}' cannot be converted to float and will be skipped.")
+
         sum_probabilities = sum(probabilities_list)
         if sum_probabilities != 1:
-            orignal_probabilities = probabilities_list.copy()
+            original_probabilities = probabilities_list.copy()
             probabilities_list = self.normalize_probabilities(probabilities_list).copy()
+            print(f"Sum of probabilities: {sum(probabilities_list)}")
             print("----------------- Normalization -----------------")
             if contains_zero:
                 logger.warning(f"Probabilities have been normalized and 0 values replaced with 0.001 "
                                f"for node with parent node: {parent_node_name}")
             else:
                 logger.info(f"Probabilities have been normalized for node with parent node: {parent_node_name}")
-            logger.info(f"Original probabilities: {orignal_probabilities}")
+            logger.info(f"Original probabilities: {original_probabilities}")
             logger.info(f"Updated probabilities: {probabilities_list}")
             print()
 
-        if parent_state_names != None and len(parent_state_names) == len(probabilities_list):
-            N.SetNodeProbs(node_name, *probabilities_list)
-            error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
-            if (error != ""):
-                print("-------------- Netica Error --------------")
-                logger.error(f'{error} for {parent_node_name}')
-                print()
+        if parent_state_names is not None and len(parent_state_names) == len(probabilities_list):
+            if N.GetNodeType_bn(node_name) == 2:  # node type is discrete
+                print("Node findings are the following:", N.GetNodeFinding_bn(node_name))
+                number_state_names = [float(f"{round(float(key), 3):.6f}") for key in key_names if isinstance(float(f"{round(float(key), 3):.6f}"), float)]
+                state_names_length = len(parent_state_names)
+                parent_state_names_length = len(parent_state_names)
+                probabilities_list_length = len(probabilities_list)
+                node_levels = N.GetNodeLevels_bn(node_name)
+                level_data = [node_levels[level] for level in range(parent_state_names_length)]
+                if level_data != node_levels:
+                    print("----------------- Node levels Not The Same -----------------")
+                    print("----------------- Original Node levels -----------------")
+                    print(level_data)
+                    N.SetNodeLevels_bn(node_name, parent_state_names_length, number_state_names)
+                    level_data = [node_levels[level] for level in range(parent_state_names_length)]
+                    print("----------------- Updating Node levels to -----------------")
+                    print(level_data)
+                print("----------------- Using unedited Probabilities -----------------")
+                print("Probabilities list:", unedited_probabilities)
+                print("Size of unedited_probabilities list:", len(unedited_probabilities))
+                print("Size of node levels:", len(level_data))
+                level_data_length = len(level_data)
+                array_of_integers = list(range(level_data_length))
+                try:
+                    N.EnterNodeLikelihood_bn(node_name, unedited_probabilities)
+                    error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
+                    if error:
+                        print("--------- Error with setting likelihood probabilities ----------")
+                        logger.error(f'{error} for {parent_node_name}')
+                        print()
+                        error = ""
+                except Exception as e:
+                    print("--------- Error with setting probabilities ----------")
+                    logger.error(f'An error occurred while setting probabilities: {str(e)}')
+                    print()
+                    error = ""
+            else:
+                N.SetNodeProbs(node_name, *probabilities_list)
+                print("<----------------- Updating probabilities ----------------->")
+                error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
+                if error != "":
+                    print("-------------- Netica Else Error --------------")
+                    logger.error(f'{error} for {parent_node_name}')
+                    print()
+                    error = ""
         else:
+            node_levels = N.GetNodeLevels_bn(node_name)
+            print("Node levels:", node_levels)
             parent_state_names = self.ParentNodeStates(parent_node_name)
+            print("Is node deterministic:", N.GetNodeType_bn(node_name))
             print("-------------- Node probabilities not updated --------------")
             logger.warning(f'Node with issues: {parent_node_name}')
             logger.warning(f"State probabilities submitted {len(probabilities_list)}"
@@ -451,6 +535,8 @@ class NeticaGraph:
                 states.append(ct.cast(N.GetNodeProbs_bn(cnode, j), ct.c_char_p).value)
         return states
 
+   
+   
     def get_float_list_values(self, float_list_object, expected_length):
         """
         Accesses the internal float values of a FloatList object using ctypes.
@@ -469,7 +555,6 @@ class NeticaGraph:
         float_array = [float_list_pointer.contents[i] for i in range(expected_length)]
 
         return float_array
-
     def cleanup_net(self):
         """Run when the object is garbage collected"""
         N.DeleteNet_bn(self.net)
