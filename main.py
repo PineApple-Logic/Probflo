@@ -4,7 +4,6 @@ from Modules.Netica_Modules.netica import NeticaManager, logger
 from NeticaPy import Netica, NewNode as NeticaNode
 import os
 import json
-import Modules.Cas_to_Json.cas_to_json
 BASE_DIR = os.getcwd()
 
 
@@ -12,9 +11,8 @@ BASE_DIR = os.getcwd()
 
 # Path to the .neta file
 NETWORK_FILE = 'Modules/Netica_Modules/Balule.neta'
-JSON_FILE = './conf/test.json'
+JSON_FILE = './conf/Balule EFLOW case file.json'
 os.environ["NETICA_PASSWORD"] = "+RoseB/Jataware/310-7/4753"
-CASE_FILE = './Uploads/output.case'
 N = Netica()
 
 
