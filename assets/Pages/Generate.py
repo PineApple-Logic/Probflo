@@ -96,6 +96,7 @@ def Generate():
                 )
 
             if button:
+                os.remove(new_path)
                 cleanup_files()  # Remove the generated case file after download
 
     # Clean up files on Streamlit rerun

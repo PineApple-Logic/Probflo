@@ -2,7 +2,11 @@ from streamlit_option_menu import option_menu
 from assets.Pages.Graphs import Graphs
 from assets.Pages.Generate import Generate
 import streamlit as st
+import os
 
+os.makedirs('./conf', exist_ok=True)
+os.makedirs('./Downloads', exist_ok=True)
+os.makedirs('./Uploads', exist_ok=True)
 
 # Tab menu
 st.set_page_config(
