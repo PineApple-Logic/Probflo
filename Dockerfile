@@ -40,7 +40,7 @@ RUN git clone https://github.com/PineApple-Logic/NeticaPy3.git /Probflo/Modules/
 RUN /bin/bash -c "source activate netica && conda install -y cython==0.29.21"
 
 # Compile NeticaPy3
-RUN cd /Probflo/Modules/NeticaPy3 && \
+RUN cd /Probflo/Modules/NeticaPy3/Installation && \
     /bin/bash -c "source activate netica && ./compile_linux.sh /opt/conda/envs/netica/include/python3.9"
 
 # Install NeticaPy3 in editable mode
