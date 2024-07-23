@@ -16,9 +16,10 @@ if 'output_file_path' not in st.session_state:
 
 def cleanup_files():
     # Cleanup function to remove the generated output file
-    if st.session_state['output_file_path'] and os.path.exists(st.session_state['output_file_path']):
-        os.remove(st.session_state['output_file_path'])
-        st.session_state['output_file_path'] = None
+    if 'output_file_path' in st.session_state:
+        if st.session_state['output_file_path'] and os.path.exists(st.session_state['output_file_path']):
+            os.remove(st.session_state['output_file_path'])
+            st.session_state['output_file_path'] = None
 
 
 def Generate():
