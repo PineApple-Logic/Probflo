@@ -7,6 +7,8 @@ import os
 os.makedirs('./conf', exist_ok=True)
 os.makedirs('./Downloads', exist_ok=True)
 os.makedirs('./Uploads', exist_ok=True)
+os.makedirs('./assets/data/Dataframe', exist_ok=True)
+
 
 # Tab menu
 st.set_page_config(
