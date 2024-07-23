@@ -17,7 +17,6 @@ logger.add(sys.stdout, format="<green>[{module}]</green><red>:</red><green>[{lin
                               "  <level>{level}<red>:</red> {message}</level>", level=level)
 
 
-
 class Checking(Enum):
     NO_CHECK = 1
     QUICK_CHECK = 2
@@ -451,7 +450,8 @@ class NeticaGraph:
         if sum_probabilities != 1:
             original_probabilities = probabilities_list.copy()
             probabilities_list = self.normalize_probabilities(probabilities_list).copy()
-            print(f"Sum of probabilities: {sum(probabilities_list)}")
+            logger.info(f"Sum of probabilities: {sum(probabilities_list)}")
+            print()
             print("----------------- Normalization -----------------")
             if contains_zero:
                 logger.warning(f"Probabilities have been normalized and 0 values replaced with 0.001 "

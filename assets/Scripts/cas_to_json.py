@@ -53,6 +53,7 @@ def parse_excel_file(input_file):
     data = df.iloc[0].tolist()
 
     result = {}
+
     for key, value in zip(header, data):
         value = value.strip('{}').split(', ')
         sub_dict = {}
@@ -73,24 +74,26 @@ def write_to_json(data, output_file):
         json.dump(data, file, indent=4)
 
 
-# List all files in the 'Uploads' directory
-input_files = os.listdir('../../Uploads/')
-
-# Process each file in the 'Uploads' directory
-for file in input_files:
-    input_path = os.path.join('../../Uploads', file)
-    if file.endswith('.xlsx'):
+def main(excel_file):
+    # Process each file in the 'Uploads' directory
+    input_path = os.path.join('./Uploads', excel_file)
+    if excel_file.endswith('.xlsx'):
         data = parse_excel_file(input_path)
     elif is_text_file(input_path):
         data = parse_text_file(input_path)
     else:
-        print(f"Skipping non-text or non-Excel file: {file}")
-        continue
+        print(f"Skipping non-text or non-Excel file: {excel_file}")
+        exit()
 
     if data:
-        output_file = f'{file.rsplit(".", 1)[0]}.json'
-        write_to_json(data, f'../../conf/{output_file}')
+        output_file = f'{excel_file.rsplit(".", 1)[0]}.json'
+        write_to_json(data, f'./conf/{output_file}')
     else:
-        print(f"Skipping file with insufficient data: {file}")
+        print(f"Skipping file with insufficient data: {excel_file}")
+    os.remove(input_path)
+    print("Conversion completed.")
 
-print("Conversion completed.")
+
+if __name__ == '__main__':
+    os.chdir('../../')
+    main('Balule NAT case file.xlsx')
