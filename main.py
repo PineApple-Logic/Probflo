@@ -20,7 +20,7 @@ st.set_page_config(
 
 select = option_menu(
     menu_title='Probflo Risk Assessment',
-    options=["Graphs", "Generate"],
+    options=["Generate", "Graphs"],
     icons=["graph-up", "globe-europe-africa"],
     default_index=0,
     orientation="horizontal",
@@ -31,4 +31,4 @@ if select == "Graphs":
 elif select == "Generate":
     Generate()
 else:
-    Graphs()
+    Generate()
