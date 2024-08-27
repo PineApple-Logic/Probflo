@@ -8,11 +8,14 @@ The application is coded in Python and utilizes the Netica C API. It offers an e
 
 ```
 git clone https://github.com/PineApple-Logic/Probflo.git
-
+```
+```
 cd Probflo
 docker build -t netica-probflo .
-docker run -m 4g -c 4 -p 8502:8501 -d --restart unless-stopped netica-probflo
+```
 
+```
+docker run -m 4g -c 4 -p 8502:8501 -d --restart unless-stopped netica-probflo
 # Change the -m (memory) -c (cpu) values as needed.
 ```
 
