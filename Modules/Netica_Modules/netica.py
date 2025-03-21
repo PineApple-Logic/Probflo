@@ -12,7 +12,7 @@ from loguru import logger
 
 # Setup logger
 logger.remove()
-level = 'DEBUG'  # Set the level of logging (DEBUG/INFO/WARNINGS/ERRORS/CRITICAL)
+level = 'INFO'  # Set the level of logging (DEBUG/INFO/WARNINGS/ERRORS/CRITICAL)
 logger.add(sys.stdout, format="<green>[{module}]</green><red>:</red><green>[{line}]</green>"
                               "  <level>{level}<red>:</red> {message}</level>", level=level)
 
@@ -370,9 +370,9 @@ class NeticaGraph:
         error = ""
         N.RetractNodeFindings_bn(node_name)
 
-        print("----------------- Info about the node -----------------")
-        logger.debug("Node name:", parent_node_name)
-        logger.debug("Node kind:", N.GetNodeKind_bn(node_name))
+        logger.info("----------------- Info about the node -----------------")
+        logger.info(f'Node name: {parent_node_name}')
+        logger.info(f'Node kind: {N.GetNodeKind_bn(node_name)}')
         node_kind = N.GetNodeKind_bn(node_name)
         node_desc = [
             {
@@ -401,15 +401,17 @@ class NeticaGraph:
                 "details": "See example code below."
             }
         ]
+
         logger.debug(node_desc[node_kind-1])
         node_children_names = [N.GetNodeName_bn(N.NthNode_bn(N.GetNodeChildren_bn(node_name), i)) for i in range(N.LengthNodeList_bn(N.GetNodeChildren_bn(node_name)))]
-        logger.debug("Node children:", node_children_names)
+        logger.debug(f'Node children: {node_children_names}')
 
         parent_node_states = self.NodeStates(parent_node_name)
         stored_likelihood = N.GetNodeLikelihood_bn(node_name)
-        print("----------------- Likelihoods -----------------")
+
+        logger.debug("----------------- Likelihoods -----------------")
         state_likelihood_array = [f"{state}: {likelihood}" for state, likelihood in zip(parent_node_states, stored_likelihood)]
-        logger.debug("State:Likelihood", state_likelihood_array)
+        logger.debug(f'State:Likelihood {state_likelihood_array}')
 
         error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
         if error:
@@ -464,65 +466,66 @@ class NeticaGraph:
 
         if parent_state_names is not None and len(parent_state_names) == len(probabilities_list):
             if N.GetNodeType_bn(node_name) == 2:  # node type is discrete
-                logger.debug("Node findings are the following:", N.GetNodeFinding_bn(node_name))
+                logger.debug(f'Node findings are the following: {N.GetNodeFinding_bn(node_name)}')
                 number_state_names = [float(f"{round(float(key), 3):.6f}") for key in key_names if isinstance(float(f"{round(float(key), 3):.6f}"), float)]
-                state_names_length = len(parent_state_names)
                 parent_state_names_length = len(parent_state_names)
-                probabilities_list_length = len(probabilities_list)
                 node_levels = N.GetNodeLevels_bn(node_name)
                 level_data = [node_levels[level] for level in range(parent_state_names_length)]
                 if level_data != node_levels:
                     print()
-                    print("----------------- Node levels Not The Same -----------------")
+                    logger.warning("----------------- Node levels Not The Same -----------------")
                     print()
-                    print("----------------- Original Node levels -----------------")
+                    logger.info("----------------- Original Node levels -----------------")
                     logger.info(level_data)
                     N.SetNodeLevels_bn(node_name, parent_state_names_length, number_state_names)
                     level_data = [node_levels[level] for level in range(parent_state_names_length)]
                     print()
-                    print("----------------- Updating Node levels to -----------------")
+                    logger.info("----------------- Updating Node levels to -----------------")
                     logger.info(level_data)
                     print()
-                print("----------------- Using unedited Probabilities -----------------")
-                logger.info("Probabilities list:", unedited_probabilities)
-                logger.info("Size of unedited_probabilities list:", len(unedited_probabilities))
-                logger.info("Size of node levels:", len(level_data))
+                logger.info("----------------- Using unedited Probabilities -----------------")
+                logger.info(f'Probabilities list: {unedited_probabilities}')
+                logger.info(f'Size of unedited_probabilities list: {len(unedited_probabilities)}')
+                logger.info(f'Size of node levels: {len(level_data)}')
                 print()
                 level_data_length = len(level_data)
                 array_of_integers = list(range(level_data_length))
                 try:
                     N.EnterNodeLikelihood_bn(node_name, unedited_probabilities)
-                    error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
+                    error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode('utf-8')
                     if error:
-                        print("--------- Error with setting likelihood probabilities ----------")
+                        logger.error('--------- Error with setting likelihood probabilities ----------')
                         logger.error(f'{error} for {parent_node_name}')
                         print()
-                        error = ""
+                        error = ''
                 except Exception as e:
-                    print("--------- Error with setting probabilities ----------")
+                    logger.error('--------- Error with setting probabilities ----------')
                     logger.error(f'An error occurred while setting probabilities: {str(e)}')
                     print()
-                    error = ""
+                    error = ''
             else:
+                print()
                 N.SetNodeProbs(node_name, *probabilities_list)
-                print("<----------------- Updating probabilities ----------------->")
-                error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode("utf-8")
-                if error != "":
-                    print("-------------- Netica Else Error --------------")
+                logger.info('<----------------- Updating probabilities ----------------->')
+                error = N.ErrorMessage_ns(N.GetError_ns(N, 5, 0)).decode('utf-8')
+                if error != '':
+                    logger.error('-------------- Netica Else Error --------------')
                     logger.error(f'{error} for {parent_node_name}')
                     print()
-                    error = ""
+                    error = ''
         else:
             node_levels = N.GetNodeLevels_bn(node_name)
-            print("Node levels:", node_levels)
+            print(f'Node levels: {node_levels}')
             parent_state_names = self.ParentNodeStates(parent_node_name)
-            print("Is node deterministic:", N.GetNodeType_bn(node_name))
-            print("-------------- Node probabilities not updated --------------")
+            print(f'Is node deterministic: {N.GetNodeType_bn(node_name)}')
+            logger.error('-------------- Node probabilities not updated --------------')
             logger.warning(f'Node with issues: {parent_node_name}')
-            logger.warning(f"State probabilities submitted {len(probabilities_list)}"
+            logger.warning(f'State probabilities submitted {len(probabilities_list)}'
                            f" don't align with number of possible states specified in json.")
             logger.warning(f'The parent states are: {parent_state_names}')
-            logger.warning(f"The states in json are f{key_names}")
+            logger.warning(parent_int)
+            logger.warning(probabilities_list)
+            logger.warning(f'The states in json are f{key_names}')
             print()
 
     def NodeProbs(self, node, naming='statename'):
