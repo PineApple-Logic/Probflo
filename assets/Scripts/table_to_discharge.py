@@ -43,17 +43,18 @@ def sum_duplicate_probabilities(values, probabilities):
 
     return list(combined.keys()), list(combined.values())
 
-def process_and_adjust_probabilities(discharge_values, all_keys):
-    adjusted_data = {}
+def process_and_adjust_probabilities(data, all_keys):
+    adjusted_data = []
 
-    for key, item in discharge_values.items():
+    for item in data:
+        # Extract the probabilities
         values = item.strip("{}").split(", ")
         entries = [value.split(" ") for value in values]
         probabilities = [float(entry[1]) for entry in entries]
         numeric_values = [float(entry[0]) for entry in entries]
 
         # Check for missing keys and add them with a preset value
-        missing_keys = [key_val for key_val in all_keys if key_val not in numeric_values]
+        missing_keys = [key for key in all_keys if key not in numeric_values]
         for missing_key in missing_keys:
             entries.append([str(missing_key), "0.001"])
             probabilities.append(0.001)
@@ -73,7 +74,7 @@ def process_and_adjust_probabilities(discharge_values, all_keys):
 
         # Reassemble the adjusted data
         adjusted_item = "{" + ", ".join([f"{sorted_entries[i][0]} {sorted_probabilities[i]:.3f}" for i in range(len(sorted_entries))]) + "}"
-        adjusted_data[key] = adjusted_item
+        adjusted_data.append(adjusted_item)
 
     return adjusted_data
 
@@ -121,12 +122,12 @@ def read_excel_file(file_path):
 
         # Ensure the probabilities are adjusted and sum to 1 before returning
         all_keys = sorted(data.keys())
-        final_data = process_and_adjust_probabilities(discharge_values, all_keys)
+        final_data = process_and_adjust_probabilities(list(discharge_values.values()), all_keys)
         return final_data
 
     except Exception as e:
         print(f"Error reading Excel file: {e}")
-        return {}
+        return []
 
 if __name__ == "__main__":
     import pathlib
